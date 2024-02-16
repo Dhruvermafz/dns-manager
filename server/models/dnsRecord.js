@@ -13,6 +13,16 @@ const dnsRecordSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  a: String,
+  aaaa: String,
+  cname: String,
+  mx: String,
+  ns: String,
+  ptr: String,
+  soa: String,
+  srv: String,
+  txt: String,
+  dnssec: String,
 });
 
 const dnsRecord = mongoose.model("dnsRecord", dnsRecordSchema);

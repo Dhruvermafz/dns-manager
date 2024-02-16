@@ -1,8 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-const { createAccessToken } = require("../utils/token");
-const { validateEmail } = require("../utils/validation");
-
+const verifyAccessToken = require("../middlewares/index");
 exports.signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -21,10 +19,6 @@ exports.signup = async (req, res) => {
       return res
         .status(400)
         .json({ msg: "Password length must be atleast 4 characters" });
-    }
-
-    if (!validateEmail(email)) {
-      return res.status(400).json({ msg: "Invalid Email" });
     }
 
     const user = await User.findOne({ email });
@@ -64,7 +58,7 @@ exports.login = async (req, res) => {
         .status(400)
         .json({ status: false, msg: "Password incorrect!!" });
 
-    const token = createAccessToken({ id: user._id });
+    const token = verifyAccessToken({ id: user._id });
     delete user.password;
     res
       .status(200)

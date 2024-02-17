@@ -17,9 +17,11 @@ import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import Footer from "./components/Footer";
 import CreateDNS from "./components/CreateDNS";
+
 function App() {
   const dispatch = useDispatch();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     // Check for token in local storage
     if (localStorage.jwtToken) {
@@ -32,7 +34,10 @@ function App() {
       const currentTime = Date.now() / 1000;
       if (decoded.exp < currentTime) {
         dispatch(logoutUser()); // Logout user if token is expired
-        window.location.href = "./login"; // Redirect to login
+        setIsLoggedIn(false); // Update login state
+        window.location.href = "/login"; // Redirect to login
+      } else {
+        setIsLoggedIn(true); // Update login state
       }
     }
   }, [dispatch]);
@@ -40,22 +45,19 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Header />
+        <Header isLoggedIn={isLoggedIn} />
         <Routes>
           <Route
             path="/"
             element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}
           />
-
           <Route path="/register" element={<Register />} />
           <Route
             path="/login"
             element={<Login setIsLoggedIn={setIsLoggedIn} />}
           />
-
           <Route path="/create-dns" element={<CreateDNS />} />
         </Routes>
-
         <Footer />
       </div>
     </Router>

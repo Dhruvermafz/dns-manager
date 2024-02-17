@@ -1,0 +1,68 @@
+.toolbar {
+    margin-bottom: 20px;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-input {
+    padding: 5px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  .pagination {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .pagination .page-item {
+    margin: 0 5px;
+  }
+  
+  .pagination .page-link {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .page-number {
+    margin: 0 10px;
+  }
+  
+  .primary-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+  }
+  
+  .primary-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .table th,
+  .table td {
+    vertical-align: middle;
+  }
+  
+  .table th {
+    background-color: #f2f2f2;
+  }
+  
+  .table td {
+    background-color: #fff;
+  }
+  
+  .table td button {
+    margin-right: 5px;
+  }
+  

@@ -40,11 +40,6 @@ const Dashboard = () => {
           />
         </Col>
       </Row>
-      <Row>
-        <Col>
-          <DNSGcp />
-        </Col>
-      </Row>
     </Container>
   );
 };

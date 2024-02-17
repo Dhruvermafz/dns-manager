@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { Button, Table, Row, Col, Modal } from "react-bootstrap";
-import api from "../../api";
+import { Button, Table, Row, Col } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import baseURL from "../../api";
+import { FaRemoveFormat, FaPen, FaTrash } from "react-icons/fa";
+import "./record.css";
 
 const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
-  const dispatch = useDispatch();
-
-  const [dnsRecords, setDNSRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage] = useState(20);
   const history = useNavigate();
+
   useEffect(() => {
     setFilteredRecords(
       records.filter((record) =>
@@ -24,8 +23,22 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
       )
     );
   }, [searchTerm, records]);
+
   const handleCreateDNSPage = () => {
     history("/create-dns");
+  };
+
+  const handleEdit = (id) => {
+    history(`/dns-record/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${baseURL}/api/dns/${id}`);
+      setRecords(records.filter((record) => record._id !== id));
+    } catch (error) {
+      console.error("Error deleting DNS record: ", error);
+    }
   };
 
   // Pagination
@@ -43,30 +56,10 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
 
   const goToNextPage = () => {
     setCurrentPage((prevPage) =>
-      Math.min(Math.ceil(dnsRecords.length / recordsPerPage), prevPage + 1)
+      Math.min(Math.ceil(filteredRecords.length / recordsPerPage), prevPage + 1)
     );
   };
-  const totalPages = Math.ceil(dnsRecords.length / recordsPerPage);
-
-  // const handleFormSubmit = async (data) => {
-  //   try {
-  //     const response = await api.post(`/dns`, data);
-  //     const newRecord = response.data;
-  //     setRecords([...records, newRecord]);
-  //     handleClose();
-  //   } catch (error) {
-  //     console.error("Error adding DNS record: ", error);
-  //   }
-  // };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/dns/${id}`);
-      onDelete(id);
-    } catch (error) {
-      console.error("Error deleting DNS record: ", error);
-    }
-  };
+  const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
 
   return (
     <>
@@ -80,16 +73,6 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <button onClick={goToPreviousPage} disabled={currentPage === 1}>
-              Previous
-            </button>
-            <span className="page-number">{`Page ${currentPage} of ${totalPages}`}</span>
-            <button
-              onClick={goToNextPage}
-              disabled={indexOfLastRecord >= dnsRecords.length}
-            >
-              Next
-            </button>
           </div>
         </Col>
         <Col md={4}>
@@ -114,18 +97,20 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
           <tbody>
             {currentRecords.map((record) => (
               <tr key={record._id}>
-                <td>{record.a}</td>
-                <td>{record.domain}</td>
-                <td>{record.recordType}</td>
-                <td>{record.value}</td>
                 <td>
+                  <Button variant="info" onClick={() => handleEdit(record._id)}>
+                    <FaPen />
+                  </Button>{" "}
                   <Button
                     variant="danger"
                     onClick={() => handleDelete(record._id)}
                   >
-                    Delete
+                    <FaTrash />
                   </Button>
                 </td>
+                <td>{record.domain}</td>
+                <td>{record.recordType}</td>
+                <td>{record.value}</td>
               </tr>
             ))}
           </tbody>

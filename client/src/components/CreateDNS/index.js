@@ -4,16 +4,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 
 const CreateDNS = () => {
-  const [a, setA] = useState("");
-  const [aaaa, setAaaa] = useState("");
-  const [cname, setCname] = useState("");
-  const [mx, setMx] = useState("");
-  const [ns, setNs] = useState("");
-  const [ptr, setPtr] = useState("");
-  const [soa, setSoa] = useState("");
-  const [srv, setSrv] = useState("");
-  const [txt, setTxt] = useState("");
-  const [dnssec, setDnssec] = useState("");
+  const [domain, setDomain] = useState("");
+  const [type, setType] = useState("");
+  const [value, setValue] = useState("");
   const history = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,125 +14,111 @@ const CreateDNS = () => {
 
     try {
       const response = await api.post("/dns-records", {
-        a,
-        aaaa,
-        cname,
-        mx,
-        ns,
-        ptr,
-        soa,
-        srv,
-        txt,
-        dnssec,
+        domain,
+        type,
+        value,
       });
       console.log("New DNS record created:", response.data);
-      history.push("/dns-records"); // Redirect to DNS records page after submission
+      history("/dns-records"); // Redirect to DNS records page after submission
     } catch (err) {
       console.error("Error adding DNS record: ", err);
     }
   };
 
   return (
-    <div>
-      <h2>Create DNS Record</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="a">
-          <Form.Label>A (Address) Record:</Form.Label>
+    <div style={styles.container}>
+      <h2 style={styles.header}>Create DNS Record</h2>
+      <Form onSubmit={handleSubmit} style={styles.form}>
+        <Form.Group controlId="domain" style={styles.formGroup}>
           <Form.Control
             type="text"
-            value={a}
-            onChange={(e) => setA(e.target.value)}
+            placeholder="Domain"
+            value={domain}
+            onChange={(e) => setDomain(e.target.value)}
             required
+            style={styles.input}
           />
         </Form.Group>
 
-        <Form.Group controlId="aaaa">
-          <Form.Label>AAAA (IPv6 Address) Record:</Form.Label>
+        <Form.Group controlId="type" style={styles.formGroup}>
+          <Form.Control
+            as="select"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            required
+            style={styles.input}
+          >
+            <option value="">Select Type</option>
+            <option value="a">A (Address)</option>
+            <option value="aaaa">AAAA (IPv6 Address)</option>
+            <option value="cname">CNAME (Canonical Name)</option>
+            <option value="mx">MX (Mail Exchange)</option>
+            <option value="ns">NS (Name Server)</option>
+            <option value="ptr">PTR (Pointer)</option>
+            <option value="soa">SOA (Start of Authority)</option>
+            <option value="srv">SRV (Service)</option>
+            <option value="txt">TXT (Text)</option>
+            <option value="dnssec">DNSSEC</option>
+          </Form.Control>
+        </Form.Group>
+
+        <Form.Group controlId="value" style={styles.formGroup}>
           <Form.Control
             type="text"
-            value={aaaa}
-            onChange={(e) => setAaaa(e.target.value)}
+            placeholder="Value"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            required
+            style={styles.input}
           />
         </Form.Group>
 
-        <Form.Group controlId="cname">
-          <Form.Label>CNAME (Canonical Name) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={cname}
-            onChange={(e) => setCname(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="mx">
-          <Form.Label>MX (Mail Exchange) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={mx}
-            onChange={(e) => setMx(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="ns">
-          <Form.Label>NS (Name Server) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={ns}
-            onChange={(e) => setNs(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="ptr">
-          <Form.Label>PTR (Pointer) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={ptr}
-            onChange={(e) => setPtr(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="soa">
-          <Form.Label>SOA (Start of Authority) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={soa}
-            onChange={(e) => setSoa(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="srv">
-          <Form.Label>SRV (Service) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={srv}
-            onChange={(e) => setSrv(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="txt">
-          <Form.Label>TXT (Text) Record:</Form.Label>
-          <Form.Control
-            type="text"
-            value={txt}
-            onChange={(e) => setTxt(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="dnssec">
-          <Form.Label>DNSSEC:</Form.Label>
-          <Form.Control
-            type="text"
-            value={dnssec}
-            onChange={(e) => setDnssec(e.target.value)}
-          />
-        </Form.Group>
-
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" style={styles.button}>
           Submit
         </Button>
       </Form>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    width: "50%",
+    margin: "auto",
+    paddingTop: "20px",
+  },
+  header: {
+    textAlign: "center",
+    marginBottom: "20px",
+  },
+  form: {
+    border: "1px solid #ccc",
+    padding: "20px",
+    borderRadius: "5px",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+  },
+  formGroup: {
+    marginBottom: "20px",
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    fontSize: "16px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    boxSizing: "border-box",
+  },
+  button: {
+    width: "100%",
+    padding: "10px",
+    fontSize: "16px",
+    backgroundColor: "#007bff",
+    border: "none",
+    color: "#fff",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
 };
 
 export default CreateDNS;

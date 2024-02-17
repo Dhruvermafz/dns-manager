@@ -2,18 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Button, Table, Row, Col, Modal } from "react-bootstrap";
 import api from "../../api";
-import DNSRecordFormModal from "./DNSRecordForm";
-import Search from "../Search";
-import CreateDNS from "../CreateDNS";
 import { Link, useNavigate } from "react-router-dom";
 
 const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
   const dispatch = useDispatch();
-  const [showModal, setShowModal] = useState(false);
+
+  const [dnsRecords, setDNSRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [recordsPerPage] = useState(5);
+  const [recordsPerPage] = useState(20);
   const history = useNavigate();
   useEffect(() => {
     setFilteredRecords(
@@ -26,7 +24,7 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
     );
   }, [searchTerm, records]);
   const handleCreateDNSPage = () => {
-    history.push("/create-dns");
+    history("/create-dns");
   };
 
   // Pagination
@@ -38,24 +36,31 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
-
-  const handleFormSubmit = async (data) => {
-    try {
-      const response = await api.post(`/dns`, data);
-      const newRecord = response.data;
-      setRecords([...records, newRecord]);
-      handleClose();
-    } catch (error) {
-      console.error("Error adding DNS record: ", error);
-    }
+  const goToPreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(1, prevPage - 1));
   };
+
+  const goToNextPage = () => {
+    setCurrentPage((prevPage) =>
+      Math.min(Math.ceil(dnsRecords.length / recordsPerPage), prevPage + 1)
+    );
+  };
+  const totalPages = Math.ceil(dnsRecords.length / recordsPerPage);
+
+  // const handleFormSubmit = async (data) => {
+  //   try {
+  //     const response = await api.post(`/dns`, data);
+  //     const newRecord = response.data;
+  //     setRecords([...records, newRecord]);
+  //     handleClose();
+  //   } catch (error) {
+  //     console.error("Error adding DNS record: ", error);
+  //   }
+  // };
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/dns-records/${id}`);
+      await api.delete(`/dns/${id}`);
       onDelete(id);
     } catch (error) {
       console.error("Error deleting DNS record: ", error);
@@ -66,7 +71,25 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
     <>
       <Row className="toolbar">
         <Col md={4}>
-          <Search setSearchTerm={setSearchTerm} />
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search by domain"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <button onClick={goToPreviousPage} disabled={currentPage === 1}>
+              Previous
+            </button>
+            <span className="page-number">{`Page ${currentPage} of ${totalPages}`}</span>
+            <button
+              onClick={goToNextPage}
+              disabled={indexOfLastRecord >= dnsRecords.length}
+            >
+              Next
+            </button>
+          </div>
         </Col>
         <Col md={4}>
           <Link to="/create-dns">
@@ -81,36 +104,23 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>A (Address)</th>
-              <th>AAAA (IPv6 Address)</th>
-              <th>CNAME</th>
-              <th>MX</th>
-              <th>NS</th>
-              <th>PTR</th>
-              <th>SOA</th>
-              <th>SRV</th>
-              <th>TXT</th>
-              <th>DNSSEC</th>
+              <th>Domain</th>
+              <th>Type</th>
+              <th>Value</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {currentRecords.map((record) => (
-              <tr key={record.id}>
+              <tr key={record._id}>
                 <td>{record.a}</td>
-                <td>{record.aaaa}</td>
-                <td>{record.cname}</td>
-                <td>{record.mx}</td>
-                <td>{record.ns}</td>
-                <td>{record.ptr}</td>
-                <td>{record.soa}</td>
-                <td>{record.srv}</td>
-                <td>{record.txt}</td>
-                <td>{record.dnssec}</td>
+                <td>{record.domain}</td>
+                <td>{record.recordType}</td>
+                <td>{record.value}</td>
                 <td>
                   <Button
                     variant="danger"
-                    onClick={() => handleDelete(record.id)}
+                    onClick={() => handleDelete(record._id)}
                   >
                     Delete
                   </Button>
@@ -134,10 +144,6 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
           )
         )}
       </ul>
-
-      <Modal show={showModal} onHide={handleClose}>
-        <DNSRecordFormModal onSubmit={handleFormSubmit} />
-      </Modal>
     </>
   );
 };

@@ -1,5 +1,10 @@
-import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import setAuthToken from "./utils/setAuthToken";
@@ -14,7 +19,7 @@ import Footer from "./components/Footer";
 import CreateDNS from "./components/CreateDNS";
 function App() {
   const dispatch = useDispatch();
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
     // Check for token in local storage
     if (localStorage.jwtToken) {
@@ -37,9 +42,17 @@ function App() {
       <div className="App">
         <Header />
         <Routes>
+          <Route
+            path="/"
+            element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}
+          />
+
           <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/login"
+            element={<Login setIsLoggedIn={setIsLoggedIn} />}
+          />
+
           <Route path="/create-dns" element={<CreateDNS />} />
         </Routes>
 

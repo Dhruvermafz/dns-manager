@@ -60,7 +60,7 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/dns/${id}`);
+      await api.delete(`/api/dns/${id}`);
       onDelete(id);
     } catch (error) {
       console.error("Error deleting DNS record: ", error);
@@ -104,10 +104,10 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
         <Table striped bordered hover>
           <thead>
             <tr>
+              <th>Action</th>
               <th>Domain</th>
               <th>Type</th>
               <th>Value</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>

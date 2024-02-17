@@ -10,7 +10,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await api.get("/dns");
+        const response = await api.get("/api/dns");
         setRecords(response.data);
       } catch (err) {
         console.log("Error fetching DNS records: ", err);

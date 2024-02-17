@@ -18,7 +18,7 @@ const DNSRecordFormModal = ({ onSubmit, showModal, handleClose }) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/dns-records", {
+      const response = await api.post("/api/dns", {
         a,
         aaaa,
         cname,

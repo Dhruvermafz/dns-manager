@@ -1,128 +1,122 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import { loginUser } from "../../actions/authActions";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import classnames from "classnames";
+import React, { useState, useEffect } from "react";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { NavLink, useNavigate } from "react-router-dom";
+import "./auth.css";
+import { auth } from "../../Firebase";
+const Login = ({ setIsLoggedIn }) => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: "",
-      password: "",
-      errors: {},
+  const storedToken = localStorage.getItem("authToken");
+
+  useEffect(() => {
+    const checkStoredToken = () => {
+      if (storedToken) {
+        navigate("/");
+        setIsLoggedIn(true);
+      }
     };
-  }
 
-  componentDidMount() {
-    if (this.props.auth.isAuthenticated) {
-      this.props.history.push("/dashboard");
-    }
-  }
+    checkStoredToken();
+  }, [storedToken, navigate, setIsLoggedIn]);
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.auth.isAuthenticated) {
-      this.props.history.push("/dashboard");
-    }
-
-    if (nextProps.errors) {
-      this.setState({
-        errors: nextProps.errors,
-      });
-    }
-  }
-
-  onChange = (e) => {
-    this.setState({ [e.target.id]: e.target.value });
-  };
-
-  onSubmit = (e) => {
+  const onLogin = async (e) => {
     e.preventDefault();
-
-    const userData = {
-      email: this.state.email,
-      password: this.state.password,
-    };
-
-    this.props.loginUser(userData);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      localStorage.setItem("authToken", userCredential.user.accessToken);
+      const user = userCredential.user;
+      console.log(user);
+      setIsLoggedIn(true);
+      navigate("/");
+    } catch (error) {
+      localStorage.removeItem("authToken");
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    }
   };
 
-  render() {
-    const { errors } = this.state;
+  const onGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      localStorage.setItem("authToken", userCredential.user.accessToken);
+      const user = userCredential.user;
+      console.log(user);
+      setIsLoggedIn(true);
+      navigate("/");
+    } catch (error) {
+      localStorage.removeItem("authToken");
+      console.error("Google Sign-In Error:", error);
+    }
+  };
 
-    return (
-      <Container>
-        <Row className="mt-4">
-          <Col md={{ span: 6, offset: 3 }}>
-            <Link to="/" className="btn btn-secondary mb-3">
-              <i className="material-icons left">keyboard_backspace</i> Back to
-              home
-            </Link>
-            <Col md={12}>
-              <h4>
-                <b>Login</b> below
-              </h4>
-              <p className="grey-text text-darken-1">
-                Don't have an account? <Link to="/register">Register</Link>
-              </p>
-            </Col>
-            <Form noValidate onSubmit={this.onSubmit}>
-              <Form.Group controlId="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
+  return (
+    <>
+      <main className="Top">
+        <div className="signup-heading">
+          <h1 className="heading">Login</h1>
+        </div>
+        <section>
+          <div>
+            <p className="heading"> DNS Manager</p>
+
+            <form>
+              <div>
+                <label htmlFor="email-address">Email address</label>
+                <input
+                  id="email-address"
+                  name="email"
                   type="email"
-                  value={this.state.email}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.email || errors.emailnotfound,
-                  })}
+                  required
+                  placeholder="Email address"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                <Alert variant="danger">
-                  {errors.email}
-                  {errors.emailnotfound}
-                </Alert>
-              </Form.Group>
-              <Form.Group controlId="password">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  value={this.state.password}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.password || errors.passwordincorrect,
-                  })}
-                />
-                <Alert variant="danger">
-                  {errors.password}
-                  {errors.passwordincorrect}
-                </Alert>
-              </Form.Group>
-              <Button
-                variant="primary"
-                type="submit"
-                style={{ marginTop: "1rem" }}
-              >
-                Login
-              </Button>
-            </Form>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-}
+              </div>
 
-Login.propTypes = {
-  loginUser: PropTypes.func.isRequired,
-  auth: PropTypes.object.isRequired,
-  errors: PropTypes.object.isRequired,
+              <div>
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <button type="submit" onClick={onLogin}>
+                  Login
+                </button>
+              </div>
+
+              <div>
+                <button type="button" onClick={onGoogleLogin}>
+                  Login with Google
+                </button>
+              </div>
+            </form>
+
+            <p className="text-sm text-white text-center">
+              No account yet? <NavLink to="/register">Sign up</NavLink>
+            </p>
+          </div>
+        </section>
+      </main>
+    </>
+  );
 };
 
-const mapStateToProps = (state) => ({
-  auth: state.auth,
-  errors: state.errors,
-});
-
-export default connect(mapStateToProps, { loginUser })(Login);
+export default Login;

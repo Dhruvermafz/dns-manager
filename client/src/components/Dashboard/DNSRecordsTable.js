@@ -1,60 +1,55 @@
-import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Button, Table, Form, Row, Col, Modal } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Button, Table, Row, Col, Modal } from "react-bootstrap";
 import api from "../../api";
 import DNSRecordFormModal from "./DNSRecordForm";
 import Search from "../Search";
+import CreateDNS from "../CreateDNS";
+import { Link, useNavigate } from "react-router-dom";
+
 const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
   const dispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = useState("");
-  const users = useSelector((state) => state.users);
   const [showModal, setShowModal] = useState(false);
-  const [pageSize] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sorted, setSorted] = useState(false);
-  const [savedUsers, setSavedUsers] = useState(users);
-  const usersLastIndex = currentPage * pageSize;
-  const usersFirstIndex = usersLastIndex - pageSize;
-  // const currentUsers = users.slice(usersFirstIndex, usersLastIndex);
-
-  // Setting up Modal
+  const [recordsPerPage] = useState(5);
+  const history = useNavigate();
+  useEffect(() => {
+    setFilteredRecords(
+      records.filter((record) =>
+        Object.values(record)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, records]);
+  const handleCreateDNSPage = () => {
+    history.push("/create-dns");
+  };
 
   // Pagination
-  const paginate = (page) => {
-    setCurrentPage(page);
-  };
-  const search = (term) => {
-    if (term.length > 2) {
-      setCurrentPage(1);
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredRecords.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
 
-      const results = savedUsers.filter((user) =>
-        Object.keys(user).some((key) =>
-          user[key]
-            .toString()
-            .toLowerCase()
-            .includes(term.toString().toLowerCase())
-        )
-      );
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-      dispatch({ type: "SET_USERS", data: results });
-    } else if (!term.length) {
-      dispatch({ type: "SET_USERS", data: savedUsers });
-    }
-  };
-
-  const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
 
   const handleFormSubmit = async (data) => {
     try {
-      // Make API call to add new DNS record
-      const response = await api.post("/dns-records", data);
+      const response = await api.post(`/dns`, data);
       const newRecord = response.data;
       setRecords([...records, newRecord]);
       handleClose();
     } catch (error) {
       console.error("Error adding DNS record: ", error);
-      // Handle error appropriately (e.g., show error message)
     }
   };
 
@@ -64,46 +59,24 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
       onDelete(id);
     } catch (error) {
       console.error("Error deleting DNS record: ", error);
-      // Handle error appropriately (e.g., show error message)
     }
-  };
-
-  const handleSearch = () => {
-    // Implement search logic
-    // This logic seems to filter records locally, consider optimizing if dealing with large datasets
-    const filteredRecords = records.filter((record) =>
-      Object.values(record).some(
-        (value) =>
-          typeof value === "string" &&
-          value.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-    setRecords(filteredRecords);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    // Reset records to the original list
-    // Alternatively, you might want to refetch records from the server
-    // setRecords(originalRecords);
   };
 
   return (
     <>
-      {/* Search and Add Buttons */}
       <Row className="toolbar">
         <Col md={4}>
-          <Search search={search} resetSearch={search} />
+          <Search setSearchTerm={setSearchTerm} />
         </Col>
-
         <Col md={4}>
-          <button className="primary-btn" onClick={handleShow}>
-            Create New DNS
-          </button>
+          <Link to="/create-dns">
+            <Button className="primary-btn" onClick={handleCreateDNSPage}>
+              Create New DNS
+            </Button>
+          </Link>
         </Col>
       </Row>
 
-      {/* DNS Records Table */}
       <div className="table-responsive">
         <Table striped bordered hover>
           <thead>
@@ -118,12 +91,11 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
               <th>SRV</th>
               <th>TXT</th>
               <th>DNSSEC</th>
-              {/* Add other table headers */}
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {records.map((record) => (
+            {currentRecords.map((record) => (
               <tr key={record.id}>
                 <td>{record.a}</td>
                 <td>{record.aaaa}</td>
@@ -135,7 +107,6 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
                 <td>{record.srv}</td>
                 <td>{record.txt}</td>
                 <td>{record.dnssec}</td>
-                {/* Add other table cells */}
                 <td>
                   <Button
                     variant="danger"
@@ -150,19 +121,22 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
         </Table>
       </div>
 
-      {/* Modal for adding new DNS record */}
+      {/* Pagination */}
+      <ul className="pagination">
+        {Array.from(
+          { length: Math.ceil(filteredRecords.length / recordsPerPage) },
+          (_, i) => (
+            <li key={i} className="page-item">
+              <button onClick={() => paginate(i + 1)} className="page-link">
+                {i + 1}
+              </button>
+            </li>
+          )
+        )}
+      </ul>
+
       <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New DNS Record</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <DNSRecordFormModal onSubmit={handleFormSubmit} />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
+        <DNSRecordFormModal onSubmit={handleFormSubmit} />
       </Modal>
     </>
   );

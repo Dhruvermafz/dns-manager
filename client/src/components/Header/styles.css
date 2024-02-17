@@ -15,3 +15,9 @@ header .logo {
   font-weight: 600;
   line-height: 1em;
 }
+
+.nav-links{
+  display: ruby;
+    /* padding: 27rem 48rem -1rem 9rem; */
+    padding-left: 80rem;
+}

@@ -4,21 +4,26 @@ const mongoose = require("mongoose");
 const path = require("path");
 const cors = require("cors");
 require("dotenv").config();
-const authRoutes = require("./routes/authRoutes");
-const profileRoutes = require("./routes/profileRoutes");
+const dnsRoutes = require("./routes/dnsRoutes");
 
 app.use(express.json());
 app.use(cors());
 
-const mongoUrl = process.env.MONGODB_URL;
-mongoose.connect(mongoUrl, (err) => {
-  if (err) throw err;
-  console.log("Mongodb connected...");
-});
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error.message);
+    process.exit(1);
+  }
+};
 
-app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);
-
+connectDB();
+app.use("/api", dnsRoutes);
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.resolve(__dirname, "../frontend/build")));
   app.get("*", (req, res) =>

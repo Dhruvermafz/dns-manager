@@ -11,6 +11,7 @@ import Login from "./components/Auth/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import Footer from "./components/Footer";
+import CreateDNS from "./components/CreateDNS";
 function App() {
   const dispatch = useDispatch();
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
+          <Route path="/create-dns" element={<CreateDNS />} />
         </Routes>
 
         <Footer />

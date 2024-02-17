@@ -1,146 +1,79 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import { registerUser } from "../../actions/authActions";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import classnames from "classnames";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../Firebase";
+import "./auth.css";
 
-class Register extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: "",
-      email: "",
-      password: "",
-      password2: "",
-      errors: {},
-    };
-  }
+const Register = () => {
+  const navigate = useNavigate();
 
-  componentDidMount() {
-    if (this.props.auth.isAuthenticated) {
-      this.props.history.push("/dashboard");
-    }
-  }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.errors) {
-      this.setState({
-        errors: nextProps.errors,
-      });
-    }
-  }
-
-  onChange = (e) => {
-    this.setState({ [e.target.id]: e.target.value });
-  };
-
-  onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
-    const newUser = {
-      name: this.state.name,
-      email: this.state.email,
-      password: this.state.password,
-      password2: this.state.password2,
-    };
-
-    this.props.registerUser(newUser, this.props.history);
+    await createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log(user);
+        navigate("/login");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+      });
   };
 
-  render() {
-    const { errors } = this.state;
-
-    return (
-      <Container>
-        <Row>
-          <Col md={{ span: 6, offset: 3 }}>
-            <Link to="/" className="btn btn-secondary mb-3">
-              <i className="material-icons left">keyboard_backspace</i> Back to
-              home
-            </Link>
-            <Col md={12} style={{ paddingLeft: "11.250px" }}>
-              <h4>
-                <b>Register</b> below
-              </h4>
-              <p className="grey-text text-darken-1">
-                Already have an account? <Link to="/login">Log in</Link>
-              </p>
-            </Col>
-            <Form noValidate onSubmit={this.onSubmit}>
-              <Form.Group controlId="name">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={this.state.name}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.name,
-                  })}
-                />
-                <Alert variant="danger">{errors.name}</Alert>
-              </Form.Group>
-              <Form.Group controlId="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
+  return (
+    <main className="Top center-container">
+      <div className="signup-heading">
+        <h1 className="heading">Register</h1>
+      </div>
+      <section>
+        <div className="main-container">
+          <div>
+            <h1 className="heading"> DNS Manager </h1>
+            <form>
+              <div>
+                <label htmlFor="email-address">Email </label>
+                <input
                   type="email"
-                  value={this.state.email}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.email,
-                  })}
+                  label="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="Email address"
                 />
-                <Alert variant="danger">{errors.email}</Alert>
-              </Form.Group>
-              <Form.Group controlId="password">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  value={this.state.password}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.password,
-                  })}
-                />
-                <Alert variant="danger">{errors.password}</Alert>
-              </Form.Group>
-              <Form.Group controlId="password2">
-                <Form.Label>Confirm Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  value={this.state.password2}
-                  onChange={this.onChange}
-                  className={classnames("", {
-                    invalid: errors.password2,
-                  })}
-                />
-                <Alert variant="danger">{errors.password2}</Alert>
-              </Form.Group>
-              <Button
-                variant="primary"
-                type="submit"
-                style={{ marginTop: "1rem" }}
-              >
-                Sign up
-              </Button>
-            </Form>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-}
+              </div>
 
-Register.propTypes = {
-  registerUser: PropTypes.func.isRequired,
-  auth: PropTypes.object.isRequired,
-  errors: PropTypes.object.isRequired,
+              <div>
+                <label htmlFor="password">Password</label>
+                <input
+                  type="password"
+                  label="Create password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Password"
+                />
+              </div>
+
+              <button type="submit" onClick={onSubmit}>
+                Sign up
+              </button>
+            </form>
+
+            <p>
+              Already have an account? <Link to="/login">Login</Link>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 };
 
-const mapStateToProps = (state) => ({
-  auth: state.auth,
-  errors: state.errors,
-});
-
-export default connect(mapStateToProps, { registerUser })(Register);
+export default Register;

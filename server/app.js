@@ -7,7 +7,14 @@ require("dotenv").config();
 const dnsRoutes = require("./routes/dnsRoutes");
 
 app.use(express.json());
-app.use(cors());
+
+// Define the CORS options
+const corsOptions = {
+  origin: ["http://localhost:3000", "https://dnsmanager.vercel.app/"],
+};
+
+// Use CORS middleware with defined options
+app.use(cors(corsOptions));
 
 const connectDB = async () => {
   try {
@@ -24,6 +31,7 @@ const connectDB = async () => {
 
 connectDB();
 app.use("/api", dnsRoutes);
+
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.resolve(__dirname, "../client/build")));
   app.get("*", (req, res) =>

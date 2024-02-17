@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import DNSGcp from "./DNSGcp";
-import api from "../../api";
 import DNSRecordsTable from "./DNSRecordsTable";
+import axios from "axios";
+import baseURL from "../../api";
 
 const Dashboard = () => {
   const [records, setRecords] = useState([]);
@@ -10,7 +11,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await api.get("/api/dns");
+        const response = await axios.get(`${baseURL}/api/dns`);
         setRecords(response.data);
       } catch (err) {
         console.log("Error fetching DNS records: ", err);

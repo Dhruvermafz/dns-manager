@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ListGroup } from "react-bootstrap";
 import axios from "axios";
-import api from "../../api";
-
+import baseURL from "../../api";
 const DNSGcp = () => {
   const [dnsRecords, setDNSRecords] = useState([]);
   const [error, setError] = useState(null);
@@ -11,7 +10,7 @@ const DNSGcp = () => {
   useEffect(() => {
     async function fetchDNSRecords() {
       try {
-        const response = await axios.get(`${api}/api/dns`);
+        const response = await axios.get(`${baseURL}/api/dns`);
         setDNSRecords(response.data);
         setLoading(false);
       } catch (err) {

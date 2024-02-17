@@ -8,14 +8,13 @@ const dnsRoutes = require("./routes/dnsRoutes");
 
 app.use(express.json());
 
-// Define the CORS options
-const corsOptions = {
-  origin: ["http://localhost:3000", "https://dnsmanager.vercel.app/"],
-};
-
-// Use CORS middleware with defined options
-app.use(cors(corsOptions));
-
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://dnsmanager.vercel.app"],
+    credentials: true,
+    optionSuccessStatus: 200,
+  })
+);
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {

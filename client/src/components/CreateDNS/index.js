@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import api from "../../api";
-
+import axios from "axios";
+import baseURL from "../../api";
 const CreateDNS = () => {
   const [domain, setDomain] = useState("");
   const [type, setType] = useState("");
@@ -13,7 +13,7 @@ const CreateDNS = () => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/dns-records", {
+      const response = await axios.post(`${baseURL}/api/dns`, {
         domain,
         type,
         value,

@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { Button, Table, Row, Col, Modal } from "react-bootstrap";
 import api from "../../api";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
   const dispatch = useDispatch();
@@ -60,7 +61,7 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/api/dns/${id}`);
+      await axios.delete(`/api/dns/${id}`);
       onDelete(id);
     } catch (error) {
       console.error("Error deleting DNS record: ", error);

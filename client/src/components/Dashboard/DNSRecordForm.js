@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Form, Row, Col, Button } from "react-bootstrap";
-import api from "../../api";
+import axios from "axios";
+import baseURL from "../../api";
 
 const DNSRecordFormModal = ({ onSubmit, showModal, handleClose }) => {
   const [a, setA] = useState("");
@@ -18,7 +19,7 @@ const DNSRecordFormModal = ({ onSubmit, showModal, handleClose }) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/api/dns", {
+      const response = await axios.post(`${baseURL}/api/dns`, {
         a,
         aaaa,
         cname,

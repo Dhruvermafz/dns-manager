@@ -1,32 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import baseURL from "../../api";
+import baseURL from "../api";
 
-const CreateDNS = () => {
+const DNSRecord = () => {
+  const { id } = useParams(); // Fetching the ID from the URL params
   const [domain, setDomain] = useState("");
   const [type, setType] = useState("");
   const [value, setValue] = useState("");
-  const navigate = useNavigate();
+  const history = useNavigate();
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    // Fetch the DNS record based on the ID when the component mounts
+    const fetchDNSRecord = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/dns/${id}`);
+        const { domain, type, value } = response.data;
+        setDomain(domain);
+        setType(type);
+        setValue(value);
+      } catch (error) {
+        console.error("Error fetching DNS record: ", error);
+      }
+    };
+    fetchDNSRecord();
+  }, [id]);
+
+  const handleUpdate = async () => {
     try {
-      const response = await axios.post(`${baseURL}/api/dns`, {
+      const response = await axios.put(`${baseURL}/api/dns/${id}`, {
         domain,
         type,
         value,
       });
-      console.log("New DNS record created:", response.data);
-      navigate("/");
+      console.log("DNS record updated:", response.data);
+      history("/");
     } catch (err) {
-      console.error("Error adding DNS record: ", err);
+      console.error("Error updating DNS record: ", err);
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Create DNS Record</h2>
+      <h2 style={styles.header}>Update DNS Record</h2>
       <Form style={styles.form}>
         <Form.Group controlId="domain" style={styles.formGroup}>
           <Form.Control
@@ -38,6 +55,7 @@ const CreateDNS = () => {
             style={styles.input}
           />
         </Form.Group>
+
         <Form.Group controlId="type" style={styles.formGroup}>
           <Form.Control
             as="select"
@@ -59,6 +77,7 @@ const CreateDNS = () => {
             <option value="dnssec">DNSSEC</option>
           </Form.Control>
         </Form.Group>
+
         <Form.Group controlId="value" style={styles.formGroup}>
           <Form.Control
             type="text"
@@ -69,13 +88,9 @@ const CreateDNS = () => {
             style={styles.input}
           />
         </Form.Group>
-        <Button
-          onClick={handleSubmit}
-          variant="primary"
-          type="submit"
-          style={styles.button}
-        >
-          Submit
+
+        <Button variant="warning" onClick={handleUpdate} style={styles.button}>
+          Update
         </Button>
       </Form>
     </div>
@@ -113,13 +128,12 @@ const styles = {
     width: "100%",
     padding: "10px",
     fontSize: "16px",
-    backgroundColor: "#007bff",
-    border: "none",
-    color: "#fff",
     borderRadius: "5px",
     cursor: "pointer",
     transition: "background-color 0.3s",
+    marginRight: "10px",
+    backgroundColor: "black",
   },
 };
 
-export default CreateDNS;
+export default DNSRecord;

@@ -3,7 +3,7 @@ import { Button, Table, Row, Col } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import baseURL from "../../api";
-import { FaRemoveFormat, FaPen, FaTrash } from "react-icons/fa";
+import { FaPen, FaTrash } from "react-icons/fa";
 import "./record.css";
 
 const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
@@ -24,20 +24,21 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
     );
   }, [searchTerm, records]);
 
-  const handleCreateDNSPage = () => {
-    history("/create-dns");
-  };
-
   const handleEdit = (id) => {
     history(`/dns-record/${id}`);
   };
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${baseURL}/api/dns/${id}`);
-      setRecords(records.filter((record) => record._id !== id));
-    } catch (error) {
-      console.error("Error deleting DNS record: ", error);
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this record?"
+    );
+    if (confirmDelete) {
+      try {
+        await axios.delete(`${baseURL}/api/dns/${id}`);
+        setRecords(records.filter((record) => record._id !== id));
+      } catch (error) {
+        console.error("Error deleting DNS record: ", error);
+      }
     }
   };
 
@@ -59,7 +60,6 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
       Math.min(Math.ceil(filteredRecords.length / recordsPerPage), prevPage + 1)
     );
   };
-  const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
 
   return (
     <>
@@ -77,9 +77,7 @@ const DNSRecordsTable = ({ records, onDelete, setRecords }) => {
         </Col>
         <Col md={4}>
           <Link to="/create-dns">
-            <Button className="primary-btn" onClick={handleCreateDNSPage}>
-              Create New DNS
-            </Button>
+            <Button className="primary-btn">Create New DNS</Button>
           </Link>
         </Col>
       </Row>

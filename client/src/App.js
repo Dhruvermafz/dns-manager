@@ -17,7 +17,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import Footer from "./components/Footer";
 import CreateDNS from "./components/CreateDNS";
-
+import DNSRecord from "./components/DNSRecord"; // Import the new DNSRecord component
+import About from "./components/About";
 function App() {
   const dispatch = useDispatch();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -57,6 +58,8 @@ function App() {
             element={<Login setIsLoggedIn={setIsLoggedIn} />}
           />
           <Route path="/create-dns" element={<CreateDNS />} />
+          <Route path="/dns-record/:id" element={<DNSRecord />} />
+          <Route path="/about" element={<About />} />
         </Routes>
         <Footer />
       </div>

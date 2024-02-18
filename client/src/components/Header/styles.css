@@ -1,23 +1,36 @@
-/* Header Styles */
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 50px;
-  background-color: #eee;
-  line-height: 50px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  z-index: 10;
+.header {
+  background-color: #fff;
+  border-bottom: 1px solid #dee2e6;
 }
 
-header .logo {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1em;
+.navbar-brand-link {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.5rem;
 }
 
-.nav-links{
-  display: ruby;
-    /* padding: 27rem 48rem -1rem 9rem; */
-    padding-left: 80rem;
+.nav-links {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link {
+  color: #333;
+  margin-left: 10px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #007bff;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.logout-link {
+  cursor: pointer;
 }

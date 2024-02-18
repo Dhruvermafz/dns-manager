@@ -7,7 +7,7 @@ import baseURL from "../api";
 const DNSRecord = () => {
   const { id } = useParams(); // Fetching the ID from the URL params
   const [domain, setDomain] = useState("");
-  const [type, setType] = useState("");
+  const [recordType, setType] = useState("");
   const [value, setValue] = useState("");
   const history = useNavigate();
 
@@ -16,9 +16,9 @@ const DNSRecord = () => {
     const fetchDNSRecord = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/dns/${id}`);
-        const { domain, type, value } = response.data;
+        const { domain, recordType, value } = response.data;
         setDomain(domain);
-        setType(type);
+        setType(recordType);
         setValue(value);
       } catch (error) {
         console.error("Error fetching DNS record: ", error);
@@ -31,7 +31,7 @@ const DNSRecord = () => {
     try {
       const response = await axios.put(`${baseURL}/api/dns/${id}`, {
         domain,
-        type,
+        recordType,
         value,
       });
       console.log("DNS record updated:", response.data);
@@ -56,10 +56,10 @@ const DNSRecord = () => {
           />
         </Form.Group>
 
-        <Form.Group controlId="type" style={styles.formGroup}>
+        <Form.Group controlId="recordType" style={styles.formGroup}>
           <Form.Control
             as="select"
-            value={type}
+            value={recordType}
             onChange={(e) => setType(e.target.value)}
             required
             style={styles.input}

@@ -17,11 +17,21 @@ import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import Footer from "./components/Footer";
 import CreateDNS from "./components/CreateDNS";
-import DNSRecord from "./components/DNSRecord"; // Import the new DNSRecord component
+import DNSRecord from "./components/DNSRecord";
 import About from "./components/About";
+import Loader from "./components/Loader";
+
 function App() {
   const dispatch = useDispatch();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
+
+  useEffect(() => {
+    // Simulate an asynchronous process (e.g., fetching user data)
+    setTimeout(() => {
+      setLoading(false); // Set loading to false after a delay
+    }, 2000); // Adjust the delay as needed
+  }, []);
 
   useEffect(() => {
     // Check for token in local storage
@@ -42,6 +52,10 @@ function App() {
       }
     }
   }, [dispatch]);
+
+  if (loading) {
+    return <Loader />; // Render the loader while loading is true
+  }
 
   return (
     <Router>

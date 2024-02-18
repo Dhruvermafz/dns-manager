@@ -3,31 +3,40 @@ import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import baseURL from "../../api";
-
-const CreateDNS = () => {
+import Loader from "../Loader";
+const CreateDNS = ({ onSubmit }) => {
   const [domain, setDomain] = useState("");
   const [type, setType] = useState("");
   const [value, setValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
+      setIsLoading(true);
       const response = await axios.post(`${baseURL}/api/dns`, {
         domain,
         type,
         value,
       });
+      onSubmit(response.data);
+      setDomain("");
+      setType("");
+      setValue("");
       console.log("New DNS record created:", response.data);
       navigate("/");
     } catch (err) {
       console.error("Error adding DNS record: ", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>Create DNS Record</h2>
-      <Form style={styles.form}>
+      <Form style={styles.form} onSubmit={handleSubmit}>
         <Form.Group controlId="domain" style={styles.formGroup}>
           <Form.Control
             type="text"
@@ -70,12 +79,12 @@ const CreateDNS = () => {
           />
         </Form.Group>
         <Button
-          onClick={handleSubmit}
           variant="primary"
-          type="submit"
           style={styles.button}
+          type="submit"
+          disabled={isLoading}
         >
-          Submit
+          {isLoading ? <Loader /> : "Submit"} {/* Use Loader component */}
         </Button>
       </Form>
     </div>

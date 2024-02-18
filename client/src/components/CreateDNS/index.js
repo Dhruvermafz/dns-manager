@@ -1,42 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import baseURL from "../../api";
-import Loader from "../Loader";
-const CreateDNS = ({ onSubmit }) => {
-  const [domain, setDomain] = useState("");
-  const [type, setType] = useState("");
-  const [value, setValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const DNSRecord = () => {
+  const [domain, setDomain] = useState("");
+  const [recordType, setType] = useState("");
+  const [value, setValue] = useState("");
+  const history = useNavigate();
+
+  const handleSubmit = async () => {
     try {
-      setIsLoading(true);
-      const response = await axios.post(`${baseURL}/api/dns`, {
+      const response = await axios.post(`${baseURL}/api/dns/`, {
         domain,
-        type,
+        recordType,
         value,
       });
-      onSubmit(response.data);
-      setDomain("");
-      setType("");
-      setValue("");
-      console.log("New DNS record created:", response.data);
-      navigate("/");
+      console.log("DNS record added:", response.data);
+      history("/");
     } catch (err) {
-      console.error("Error adding DNS record: ", err);
-    } finally {
-      setIsLoading(false);
+      console.error("Error updating DNS record: ", err);
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Create DNS Record</h2>
-      <Form style={styles.form} onSubmit={handleSubmit}>
+      <h2 style={styles.header}>Update DNS Record</h2>
+      <Form style={styles.form}>
         <Form.Group controlId="domain" style={styles.formGroup}>
           <Form.Control
             type="text"
@@ -47,10 +38,11 @@ const CreateDNS = ({ onSubmit }) => {
             style={styles.input}
           />
         </Form.Group>
-        <Form.Group controlId="type" style={styles.formGroup}>
+
+        <Form.Group controlId="recordType" style={styles.formGroup}>
           <Form.Control
             as="select"
-            value={type}
+            value={recordType}
             onChange={(e) => setType(e.target.value)}
             required
             style={styles.input}
@@ -68,6 +60,7 @@ const CreateDNS = ({ onSubmit }) => {
             <option value="dnssec">DNSSEC</option>
           </Form.Control>
         </Form.Group>
+
         <Form.Group controlId="value" style={styles.formGroup}>
           <Form.Control
             type="text"
@@ -78,13 +71,9 @@ const CreateDNS = ({ onSubmit }) => {
             style={styles.input}
           />
         </Form.Group>
-        <Button
-          variant="primary"
-          style={styles.button}
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader /> : "Submit"} {/* Use Loader component */}
+
+        <Button variant="warning" onClick={handleSubmit} style={styles.button}>
+          Submit
         </Button>
       </Form>
     </div>
@@ -122,13 +111,12 @@ const styles = {
     width: "100%",
     padding: "10px",
     fontSize: "16px",
-    backgroundColor: "#007bff",
-    border: "none",
-    color: "#fff",
     borderRadius: "5px",
     cursor: "pointer",
     transition: "background-color 0.3s",
+    marginRight: "10px",
+    backgroundColor: "black",
   },
 };
 
-export default CreateDNS;
+export default DNSRecord;

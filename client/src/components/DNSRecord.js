@@ -5,14 +5,13 @@ import axios from "axios";
 import baseURL from "../api";
 
 const DNSRecord = () => {
-  const { id } = useParams(); // Fetching the ID from the URL params
+  const { id } = useParams();
   const [domain, setDomain] = useState("");
   const [recordType, setType] = useState("");
   const [value, setValue] = useState("");
   const history = useNavigate();
 
   useEffect(() => {
-    // Fetch the DNS record based on the ID when the component mounts
     const fetchDNSRecord = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/dns/${id}`);

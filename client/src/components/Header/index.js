@@ -1,17 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FaGithub, FaGitSquare, FaSignOutAlt } from "react-icons/fa";
-import "./styles.css";
-import { logoutUser as logout } from "../../actions/authActions";
 
+import { signOut } from "firebase/auth";
+import { auth } from "../../Firebase";
 const Header = ({ isLoggedIn }) => {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState();
   const handleLogout = () => {
-    dispatch(logout());
+    signOut(auth)
+      .then(() => {
+        localStorage.removeItem("authToken");
+        navigate("/login");
+        console.log("Signed out successfully");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
   };
+
+  const storedToken = localStorage.getItem("authToken");
+  if (!storedToken) {
+    navigate("/login");
+  }
 
   return (
     <Navbar bg="light" expand="lg" className="header">
